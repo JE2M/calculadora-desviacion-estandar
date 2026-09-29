@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Desviación Estándar</title>
+<style>
+:root{color-scheme:light dark;--bg:#f5f7fb;--surface:#fff;--surface2:#eef2f7;--text:#18202a;--muted:#667085;--border:#d7dee8;--accent:#2563eb;--accent2:#1d4ed8;--danger:#dc2626;--shadow:0 14px 35px rgba(20,35,60,.10)}
+@media(prefers-color-scheme:dark){:root{--bg:#10151c;--surface:#171e27;--surface2:#202a36;--text:#eef2f7;--muted:#9aa8b8;--border:#344150;--accent:#60a5fa;--accent2:#93c5fd;--danger:#f87171;--shadow:0 14px 35px rgba(0,0,0,.25)}}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+#app{min-height:100vh;background-color:var(--bg);padding:28px 18px 40px;border-radius:0}.wrap{max-width:1050px;margin:auto}
+header{margin-bottom:22px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:800}.title{font-size:clamp(28px,5vw,44px);margin:6px 0 8px;line-height:1.05}.subtitle{color:var(--muted);margin:0;max-width:720px}
+.grid{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(340px,1.1fr);gap:18px}.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:8px}.hint{font-size:12px;color:var(--muted);margin-top:6px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}
+textarea,input,select{width:100%;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:12px;font:inherit;outline:none}textarea{min-height:150px;resize:vertical}textarea:focus,input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+button{border:0;border-radius:11px;padding:11px 15px;font:inherit;font-weight:800;cursor:pointer;background:var(--accent);color:white}button:hover{background:var(--accent2)}button.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}button.danger{background:transparent;color:var(--danger);border:1px solid var(--border)}
+.actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}.results{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.metric{background:var(--surface2);border:1px solid var(--border);padding:14px;border-radius:13px}.metric small{display:block;color:var(--muted);font-weight:700}.metric strong{display:block;font-size:25px;margin-top:4px}
+.step{border-top:1px solid var(--border);padding:13px 0}.step:first-child{border-top:0}.step b{color:var(--accent)}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--surface2);border-radius:10px;padding:10px;overflow:auto;margin-top:7px;font-size:13px}.table-wrap{overflow:auto;margin-top:12px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:right;padding:8px;border-bottom:1px solid var(--border)}th{text-align:center;color:var(--muted)}td:first-child{text-align:center}
+.empty{color:var(--muted);padding:30px 5px;text-align:center}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent);font-size:12px;font-weight:800;margin-bottom:8px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}.results{grid-template-columns:1fr 1fr}}@media(max-width:450px){#app{padding:20px 12px 30px}.card{padding:15px}.results{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch}}
+</style>
+</head>
+<body>
+<div id="app"><div class="wrap">
+<header><div class="eyebrow">Estadística básica</div><h1 class="title">Calculadora de desviación estándar</h1><p class="subtitle">Ingresa tus datos y obtén automáticamente la media, varianza y desviación estándar, con el procedimiento paso a paso.</p></header>
+<div class="grid">
+<section class="card">
+<span class="badge">1 · Datos</span>
+<label for="datos">Valores numéricos</label>
+<textarea id="datos" placeholder="Ejemplo: 10, 12, 15, 18, 20"></textarea>
+<div class="hint">Puedes separar los datos con comas, espacios o saltos de línea.</div>
+<div style="height:14px"></div>
+<label for="tipo">Tipo de conjunto</label>
+<select id="tipo"><option value="muestra">Muestra (n − 1)</option><option value="poblacion">Población (n)</option></select>
+<div class="hint">Usa “muestra” cuando tus datos representan una muestra de una población mayor.</div>
+<div class="actions"><button id="calcular">Calcular</button><button class="secondary" id="ejemplo">Cargar ejemplo</button><button class="danger" id="limpiar">Limpiar</button></div>
+</section>
+<section class="card">
+<span class="badge">2 · Resultado</span><div id="resultado" class="empty">Ingresa los datos y pulsa <b>Calcular</b>.</div>
+</section>
+</div></div>
+<script>
+const $=id=>document.getElementById(id);
+function parseData(){return $('datos').value.trim().split(/[\s,;]+/).filter(Boolean).map(v=>Number(v.replace(',','.'))).filter(v=>Number.isFinite(v));}
+function fmt(n){return Number(n).toLocaleString('es-PE',{maximumFractionDigits:6});}
+function calculate(){
+ const x=parseData(), tipo=$('tipo').value, out=$('resultado');
+ if(x.length<2){out.innerHTML='<div class="empty">Necesitas ingresar al menos <b>2 valores numéricos</b>.</div>';return;}
+ const n=x.length, media=x.reduce((a,b)=>a+b,0)/n, sq=x.map(v=>(v-media)**2), suma=sq.reduce((a,b)=>a+b,0), divisor=tipo==='muestra'?n-1:n, varianza=suma/divisor, sd=Math.sqrt(varianza);
+ out.innerHTML=`<div><div class="results"><div class="metric"><small>N.º de datos</small><strong>${n}</strong></div><div class="metric"><small>Media (x̄)</small><strong>${fmt(media)}</strong></div><div class="metric"><small>Varianza (${tipo==='muestra'?'s²':'σ²'})</small><strong>${fmt(varianza)}</strong></div><div class="metric"><small>Desviación estándar (${tipo==='muestra'?'s':'σ'})</small><strong>${fmt(sd)}</strong></div></div>
+ <div class="step"><b>1. Media</b><div class="formula">x̄ = Σx / n = ${fmt(x.reduce((a,b)=>a+b,0))} / ${n} = ${fmt(media)}</div></div>
+ <div class="step"><b>2. Suma de cuadrados</b><div class="formula">Σ(x − x̄)² = ${fmt(suma)}</div></div>
+ <div class="step"><b>3. Varianza</b><div class="formula">${tipo==='muestra'?'s² = Σ(x − x̄)² / (n − 1)':'σ² = Σ(x − x̄)² / n'} = ${fmt(suma)} / ${divisor} = ${fmt(varianza)}</div></div>
+ <div class="step"><b>4. Desviación estándar</b><div class="formula">${tipo==='muestra'?'s':'σ'} = √${fmt(varianza)} = <strong>${fmt(sd)}</strong></div></div>
+ <div class="table-wrap"><table><thead><tr><th>#</th><th>x</th><th>x − x̄</th><th>(x − x̄)²</th></tr></thead><tbody>${x.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v)}</td><td>${fmt(v-media)}</td><td>${fmt(sq[i])}</td></tr>`).join('')}</tbody></table></div></div>`;
+}
+$('calcular').onclick=calculate;$('ejemplo').onclick=()=>{$('datos').value='10, 12, 15, 18, 20';$('tipo').value='muestra';calculate()};$('limpiar').onclick=()=>{$('datos').value='';$('resultado').innerHTML='<div class="empty">Ingresa los datos y pulsa <b>Calcular</b>.</div>';};
+</script>
+</div></body></html>
