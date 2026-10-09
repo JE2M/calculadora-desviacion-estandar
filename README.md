@@ -1,3 +1,4 @@
+# MENDOZA MAMANI JAIR EDISSON
 # Calculadora de Desviación Estándar
 
 Aplicación web desarrollada con **HTML, CSS y JavaScript** para calcular estadísticamente la desviación estándar de un conjunto de datos.
