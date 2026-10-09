@@ -2,58 +2,198 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Calculadora de Desviación Estándar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Prueba de hipótesis para la media (Z)</title>
 <style>
-:root{color-scheme:light dark;--bg:#f5f7fb;--surface:#fff;--surface2:#eef2f7;--text:#18202a;--muted:#667085;--border:#d7dee8;--accent:#2563eb;--accent2:#1d4ed8;--danger:#dc2626;--shadow:0 14px 35px rgba(20,35,60,.10)}
-@media(prefers-color-scheme:dark){:root{--bg:#10151c;--surface:#171e27;--surface2:#202a36;--text:#eef2f7;--muted:#9aa8b8;--border:#344150;--accent:#60a5fa;--accent2:#93c5fd;--danger:#f87171;--shadow:0 14px 35px rgba(0,0,0,.25)}}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
-#app{min-height:100vh;background-color:var(--bg);padding:28px 18px 40px;border-radius:0}.wrap{max-width:1050px;margin:auto}
-header{margin-bottom:22px}.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:800}.title{font-size:clamp(28px,5vw,44px);margin:6px 0 8px;line-height:1.05}.subtitle{color:var(--muted);margin:0;max-width:720px}
-.grid{display:grid;grid-template-columns:minmax(300px,.9fr) minmax(340px,1.1fr);gap:18px}.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
-label{font-weight:700;font-size:14px;display:block;margin-bottom:8px}.hint{font-size:12px;color:var(--muted);margin-top:6px}.row{display:flex;gap:10px;align-items:center}.row>*{flex:1}
-textarea,input,select{width:100%;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:12px;font:inherit;outline:none}textarea{min-height:150px;resize:vertical}textarea:focus,input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
-button{border:0;border-radius:11px;padding:11px 15px;font:inherit;font-weight:800;cursor:pointer;background:var(--accent);color:white}button:hover{background:var(--accent2)}button.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}button.danger{background:transparent;color:var(--danger);border:1px solid var(--border)}
-.actions{display:flex;gap:9px;margin-top:14px;flex-wrap:wrap}.results{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:14px 0}.metric{background:var(--surface2);border:1px solid var(--border);padding:14px;border-radius:13px}.metric small{display:block;color:var(--muted);font-weight:700}.metric strong{display:block;font-size:25px;margin-top:4px}
-.step{border-top:1px solid var(--border);padding:13px 0}.step:first-child{border-top:0}.step b{color:var(--accent)}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--surface2);border-radius:10px;padding:10px;overflow:auto;margin-top:7px;font-size:13px}.table-wrap{overflow:auto;margin-top:12px}table{border-collapse:collapse;width:100%;font-size:13px}th,td{text-align:right;padding:8px;border-bottom:1px solid var(--border)}th{text-align:center;color:var(--muted)}td:first-child{text-align:center}
-.empty{color:var(--muted);padding:30px 5px;text-align:center}.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent);font-size:12px;font-weight:800;margin-bottom:8px}
-@media(max-width:780px){.grid{grid-template-columns:1fr}.results{grid-template-columns:1fr 1fr}}@media(max-width:450px){#app{padding:20px 12px 30px}.card{padding:15px}.results{grid-template-columns:1fr}.row{flex-direction:column;align-items:stretch}}
+:root{--bg:#f5f7fb;--surface:#fff;--surface2:#eef2f7;--text:#18202a;--muted:#667085;--border:#d7dee8;--accent:#2563eb;--accent2:#1d4ed8;--danger:#dc2626;--ok:#16a34a;--shadow:0 14px 35px rgba(20,35,60,.10);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10151c;--surface:#171e27;--surface2:#202a36;--text:#eef2f7;--muted:#9aa8b8;--border:#344150;--accent:#60a5fa;--accent2:#93c5fd;--danger:#f87171;--ok:#4ade80;--shadow:0 14px 35px rgba(0,0,0,.25)}}
+:root[data-theme="dark"]{--bg:#10151c;--surface:#171e27;--surface2:#202a36;--text:#eef2f7;--muted:#9aa8b8;--border:#344150;--accent:#60a5fa;--accent2:#93c5fd;--danger:#f87171;--ok:#4ade80;--shadow:0 14px 35px rgba(0,0,0,.25)}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text)}
+.wrap{max-width:1100px;margin:auto;padding:28px 18px 40px}
+.eyebrow{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);font-weight:800}
+h1{font-size:clamp(26px,5vw,42px);margin:6px 0 8px;line-height:1.08}
+.subtitle{color:var(--muted);margin:0 0 6px;max-width:740px}
+.autor{display:inline-block;margin-top:8px;font-size:13px;color:var(--muted)}.autor b{color:var(--text)}
+.grid{display:grid;grid-template-columns:minmax(300px,.8fr) minmax(340px,1.2fr);gap:18px;margin-top:20px;align-items:start}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;box-shadow:var(--shadow)}
+label{font-weight:700;font-size:13px;display:block;margin-bottom:6px}
+.hint{font-size:12px;color:var(--muted);margin-top:5px}
+.f{margin-bottom:13px}.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+input,select{width:100%;border:1px solid var(--border);background:var(--surface2);color:var(--text);border-radius:12px;padding:11px;font:inherit;outline:none}
+input:focus,select:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent)}
+button{border:0;border-radius:11px;padding:11px 15px;font:inherit;font-weight:800;cursor:pointer;background:var(--accent);color:#fff}
+button:hover{background:var(--accent2)}button.secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+button.danger{background:transparent;color:var(--danger);border:1px solid var(--border)}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:6px}
+.badge{display:inline-block;padding:4px 8px;border-radius:999px;background:color-mix(in srgb,var(--accent) 13%,transparent);color:var(--accent);font-size:12px;font-weight:800;margin-bottom:10px}
+.step{border-top:1px solid var(--border);padding:14px 0}.step:first-of-type{border-top:0}
+.step h3{margin:0 0 8px;font-size:15px;color:var(--accent)}
+.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--surface2);border-radius:10px;padding:10px;overflow-x:auto;margin-top:7px;font-size:13px;line-height:1.7;white-space:pre}
+.table-wrap{overflow-x:auto}
+table{border-collapse:collapse;font-size:13px;margin-top:8px}th,td{padding:7px 14px;border-bottom:1px solid var(--border);text-align:center}th{color:var(--muted)}
+.concl{padding:14px;border-radius:13px;font-weight:700;border:1px solid var(--border);background:var(--surface2)}
+.concl.rej{border-color:var(--danger)}.concl.acc{border-color:var(--ok)}
+.empty{color:var(--muted);padding:30px 5px;text-align:center}
+svg{width:100%;height:auto;display:block}
+.note{font-size:12px;color:var(--muted);margin-top:8px}
+@media(max-width:780px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
-<div id="app"><div class="wrap">
-<header><div class="eyebrow">Estadística básica</div><h1 class="title">Calculadora de desviación estándar</h1><p class="subtitle">Ingresa tus datos y obtén automáticamente la media, varianza y desviación estándar, con el procedimiento paso a paso.</p></header>
+<div class="wrap">
+<header>
+  <div class="eyebrow">Estadística inferencial</div>
+  <h1>Prueba de hipótesis para la media (Z)</h1>
+  <p class="subtitle">Ingresa los datos del ejercicio y se resuelve paso a paso: hipótesis, nivel de significancia, prueba estadística, criterio de decisión (con interpolación en la tabla Z) y conclusión.</p>
+  <span class="autor">Nombre: <b id="autorTxt">Mendoza Mamani Jair Edisson</b></span>
+</header>
+
 <div class="grid">
 <section class="card">
-<span class="badge">1 · Datos</span>
-<label for="datos">Valores numéricos</label>
-<textarea id="datos" placeholder="Ejemplo: 10, 12, 15, 18, 20"></textarea>
-<div class="hint">Puedes separar los datos con comas, espacios o saltos de línea.</div>
-<div style="height:14px"></div>
-<label for="tipo">Tipo de conjunto</label>
-<select id="tipo"><option value="muestra">Muestra (n − 1)</option><option value="poblacion">Población (n)</option></select>
-<div class="hint">Usa “muestra” cuando tus datos representan una muestra de una población mayor.</div>
-<div class="actions"><button id="calcular">Calcular</button><button class="secondary" id="ejemplo">Cargar ejemplo</button><button class="danger" id="limpiar">Limpiar</button></div>
+  <span class="badge">Datos</span>
+  <div class="f"><label for="nombre">Nombre</label><input id="nombre" value="Mendoza Mamani Jair Edisson"></div>
+  <div class="two">
+    <div class="f"><label for="alfa">α (nivel de significancia)</label><input id="alfa" inputmode="decimal" placeholder="0.05"><div class="hint">Ej: 0.05 ó 5%</div></div>
+    <div class="f"><label for="n">n (tamaño de muestra)</label><input id="n" inputmode="numeric" placeholder="36"></div>
+  </div>
+  <div class="two">
+    <div class="f"><label for="xbar">x̄ (media muestral)</label><input id="xbar" inputmode="decimal" placeholder="1510"></div>
+    <div class="f"><label for="mu">μ₀ (media de H₀)</label><input id="mu" inputmode="decimal" placeholder="1500"></div>
+  </div>
+  <div class="two">
+    <div class="f"><label for="stype">Dato de dispersión</label>
+      <select id="stype"><option value="var">Varianza (s² ó σ²)</option><option value="sd">Desviación (s ó σ)</option></select></div>
+    <div class="f"><label for="sval">Valor</label><input id="sval" inputmode="decimal" placeholder="900"></div>
+  </div>
+  <div class="f"><label for="h1">Hipótesis alternativa H₁</label>
+    <select id="h1"><option value=">">μ &gt; μ₀ (cola derecha)</option><option value="<">μ &lt; μ₀ (cola izquierda)</option><option value="!=">μ ≠ μ₀ (dos colas)</option></select></div>
+  <div class="actions"><button id="calcular">Resolver</button><button class="secondary" id="ejemplo">Cargar ejemplo</button><button class="danger" id="limpiar">Limpiar</button></div>
 </section>
+
 <section class="card">
-<span class="badge">2 · Resultado</span><div id="resultado" class="empty">Ingresa los datos y pulsa <b>Calcular</b>.</div>
+  <span class="badge">Resolución</span>
+  <div id="res" class="empty">Ingresa los datos y pulsa <b>Resolver</b>.</div>
 </section>
-</div></div>
+</div>
+</div>
+
 <script>
 const $=id=>document.getElementById(id);
-function parseData(){return $('datos').value.trim().split(/[\s,;]+/).filter(Boolean).map(v=>Number(v.replace(',','.'))).filter(v=>Number.isFinite(v));}
-function fmt(n){return Number(n).toLocaleString('es-PE',{maximumFractionDigits:6});}
-function calculate(){
- const x=parseData(), tipo=$('tipo').value, out=$('resultado');
- if(x.length<2){out.innerHTML='<div class="empty">Necesitas ingresar al menos <b>2 valores numéricos</b>.</div>';return;}
- const n=x.length, media=x.reduce((a,b)=>a+b,0)/n, sq=x.map(v=>(v-media)**2), suma=sq.reduce((a,b)=>a+b,0), divisor=tipo==='muestra'?n-1:n, varianza=suma/divisor, sd=Math.sqrt(varianza);
- out.innerHTML=`<div><div class="results"><div class="metric"><small>N.º de datos</small><strong>${n}</strong></div><div class="metric"><small>Media (x̄)</small><strong>${fmt(media)}</strong></div><div class="metric"><small>Varianza (${tipo==='muestra'?'s²':'σ²'})</small><strong>${fmt(varianza)}</strong></div><div class="metric"><small>Desviación estándar (${tipo==='muestra'?'s':'σ'})</small><strong>${fmt(sd)}</strong></div></div>
- <div class="step"><b>1. Media</b><div class="formula">x̄ = Σx / n = ${fmt(x.reduce((a,b)=>a+b,0))} / ${n} = ${fmt(media)}</div></div>
- <div class="step"><b>2. Suma de cuadrados</b><div class="formula">Σ(x − x̄)² = ${fmt(suma)}</div></div>
- <div class="step"><b>3. Varianza</b><div class="formula">${tipo==='muestra'?'s² = Σ(x − x̄)² / (n − 1)':'σ² = Σ(x − x̄)² / n'} = ${fmt(suma)} / ${divisor} = ${fmt(varianza)}</div></div>
- <div class="step"><b>4. Desviación estándar</b><div class="formula">${tipo==='muestra'?'s':'σ'} = √${fmt(varianza)} = <strong>${fmt(sd)}</strong></div></div>
- <div class="table-wrap"><table><thead><tr><th>#</th><th>x</th><th>x − x̄</th><th>(x − x̄)²</th></tr></thead><tbody>${x.map((v,i)=>`<tr><td>${i+1}</td><td>${fmt(v)}</td><td>${fmt(v-media)}</td><td>${fmt(sq[i])}</td></tr>`).join('')}</tbody></table></div></div>`;
+const num=v=>{v=String(v).trim().replace('%','').replace(',','.');return v===''?NaN:Number(v)};
+function fmt(x,d=4){if(!Number.isFinite(x))return '—';return String(Number(x.toFixed(d)))}
+
+// Φ(z): función de distribución normal estándar (serie de alta precisión)
+function Phi(z){
+  z=Math.max(-7,Math.min(7,z));
+  let t=z,s=z;
+  for(let k=1;k<400;k++){t*=z*z/(2*k+1);s+=t;if(Math.abs(t)<1e-18)break}
+  return Math.min(1,Math.max(0,.5+Math.exp(-z*z/2)/Math.sqrt(2*Math.PI)*s));
 }
-$('calcular').onclick=calculate;$('ejemplo').onclick=()=>{$('datos').value='10, 12, 15, 18, 20';$('tipo').value='muestra';calculate()};$('limpiar').onclick=()=>{$('datos').value='';$('resultado').innerHTML='<div class="empty">Ingresa los datos y pulsa <b>Calcular</b>.</div>';};
+// Valor "de tabla": Φ redondeado a 4 decimales, paso 0.01
+const tabla=i=>Math.round(Phi(i/100)*1e4)/1e4;
+
+// Busca z crítico para el área acumulada p, interpolando en la tabla
+function critico(p){
+  for(let i=0;i<=398;i++){
+    const a=tabla(i),b=tabla(i+1);
+    if(Math.abs(a-p)<1e-9)return{exact:true,z1:i/100,p1:a,x:i/100};
+    if(a<p&&p<b){
+      const z1=i/100,z2=(i+1)/100;
+      return{exact:false,z1,z2,p1:a,p2:b,x:z1+(p-a)/(b-a)*(z2-z1)};
+    }
+  }
+  return null;
+}
+
+function grafica(tipo,zc,Z,rechaza){
+  const W=600,H=230,x0=40,x1=560,yb=185,yt=30;
+  const X=z=>x0+(z+4)/8*(x1-x0), Y=z=>yb-Math.exp(-z*z/2)*(yb-yt);
+  const curva=(a,b)=>{let d='';for(let z=a;z<=b+1e-9;z+=.05)d+=(d?'L':'M')+X(z).toFixed(1)+' '+Y(z).toFixed(1)+' ';return d};
+  const area=(a,b)=>curva(a,b)+`L${X(b).toFixed(1)} ${yb}L${X(a).toFixed(1)} ${yb}Z`;
+  let rr='',lab='';
+  if(tipo==='>'){rr=`<path d="${area(zc,4)}" fill="var(--danger)" opacity=".35"/>`;
+    lab=`<text x="${(X(zc)+x0)/2}" y="${yb+36}" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="700">R.A.</text><text x="${(X(zc)+x1)/2}" y="${yb+36}" text-anchor="middle" fill="var(--danger)" font-size="13" font-weight="700">R.R.</text>`}
+  else if(tipo==='<'){rr=`<path d="${area(-4,-zc)}" fill="var(--danger)" opacity=".35"/>`;
+    lab=`<text x="${(X(-zc)+x0)/2}" y="${yb+36}" text-anchor="middle" fill="var(--danger)" font-size="13" font-weight="700">R.R.</text><text x="${(X(-zc)+x1)/2}" y="${yb+36}" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="700">R.A.</text>`}
+  else{rr=`<path d="${area(zc,4)}" fill="var(--danger)" opacity=".35"/><path d="${area(-4,-zc)}" fill="var(--danger)" opacity=".35"/>`;
+    lab=`<text x="${(X(-zc)+x0)/2}" y="${yb+36}" text-anchor="middle" fill="var(--danger)" font-size="13" font-weight="700">R.R.</text><text x="${X(0)}" y="${yb+36}" text-anchor="middle" fill="var(--text)" font-size="13" font-weight="700">R.A.</text><text x="${(X(zc)+x1)/2}" y="${yb+36}" text-anchor="middle" fill="var(--danger)" font-size="13" font-weight="700">R.R.</text>`}
+  const crit=(tipo==='!='?[-zc,zc]:[tipo==='>'?zc:-zc]).map(c=>`<line x1="${X(c)}" y1="${yt-5}" x2="${X(c)}" y2="${yb+6}" stroke="var(--text)" stroke-dasharray="4 3"/><text x="${X(c)}" y="${yb+20}" text-anchor="middle" fill="var(--text)" font-size="12">${fmt(c,3)}</text>`).join('');
+  const zc2=Math.max(-3.9,Math.min(3.9,Z));
+  const zm=`<line x1="${X(zc2)}" y1="${yt+25}" x2="${X(zc2)}" y2="${yb}" stroke="var(--accent)" stroke-width="2.5"/><circle cx="${X(zc2)}" cy="${yt+25}" r="5" fill="var(--accent)"/><text x="${X(zc2)}" y="${yt+14}" text-anchor="middle" fill="var(--accent)" font-size="13" font-weight="800">Z = ${fmt(Z,3)}</text>`;
+  return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Campana de Gauss con regiones de aceptación y rechazo">
+  ${rr}<path d="${curva(-4,4)}" fill="none" stroke="var(--text)" stroke-width="2"/>
+  <line x1="${x0}" y1="${yb}" x2="${x1}" y2="${yb}" stroke="var(--muted)"/>
+  <text x="${X(0)}" y="${yb+20}" text-anchor="middle" fill="var(--muted)" font-size="12">0</text>
+  ${crit}${lab}${zm}</svg>`;
+}
+
+function resolver(){
+  const out=$('res');
+  $('autorTxt').textContent=$('nombre').value.trim()||'—';
+  let alfa=num($('alfa').value);if($('alfa').value.includes('%'))alfa/=100;if(alfa>=1)alfa/=100;
+  const n=num($('n').value),xb=num($('xbar').value),mu=num($('mu').value);
+  let sv=num($('sval').value);const stype=$('stype').value,tipo=$('h1').value;
+  if([alfa,n,xb,mu,sv].some(v=>!Number.isFinite(v))){out.innerHTML='<div class="empty">Completa <b>todos los campos</b> con valores numéricos.</div>';return}
+  if(!(alfa>0&&alfa<0.5)){out.innerHTML='<div class="empty">α debe estar entre 0 y 0.5 (por ejemplo 0.05).</div>';return}
+  if(n<2||!(sv>0)){out.innerHTML='<div class="empty">n debe ser ≥ 2 y la dispersión mayor que 0.</div>';return}
+
+  const s=stype==='var'?Math.sqrt(sv):sv, vr=stype==='var'?sv:sv*sv;
+  const ee=s/Math.sqrt(n), Z=(xb-mu)/ee;
+  const sym=tipo==='>'?'>':tipo==='<'?'<':'≠';
+  const p=tipo==='!='?1-alfa/2:1-alfa;
+  const c=critico(p);
+  if(!c){out.innerHTML='<div class="empty">No se pudo ubicar el valor crítico en la tabla.</div>';return}
+  const zc=c.x;
+  const rechaza=tipo==='>'?Z>zc:tipo==='<'?Z<-zc:Math.abs(Z)>zc;
+  const pval=tipo==='>'?1-Phi(Z):tipo==='<'?Phi(Z):2*(1-Phi(Math.abs(Z)));
+
+  const critTxt=tipo==='>'?`Z crítico = ${fmt(zc,3)}`:tipo==='<'?`Z crítico = −${fmt(zc,3)}`:`Z crítico = ±${fmt(zc,3)}`;
+  const areaTxt=tipo==='!='?`1 − α/2 = 1 − ${fmt(alfa/2,5)} = ${fmt(p,5)}`:`1 − α = 1 − ${fmt(alfa,5)} = ${fmt(p,5)}`;
+
+  let interp;
+  if(c.exact){
+    interp=`<div>El área ${fmt(p,4)} aparece exactamente en la tabla:</div><div class="formula">Z = ${fmt(c.z1,2)}  →  Φ(Z) = ${fmt(c.p1,4)}\nZ crítico = ${fmt(zc,3)}</div>`;
+  }else{
+    interp=`<div>El área ${fmt(p,4)} no aparece exacta en la tabla, se interpola entre dos valores:</div>
+    <div class="table-wrap"><table><thead><tr><th>Z</th><th>Área Φ(Z)</th></tr></thead><tbody>
+    <tr><td>${fmt(c.z1,2)}</td><td>${fmt(c.p1,4)}</td></tr>
+    <tr><td><b>x</b></td><td><b>${fmt(p,4)}</b></td></tr>
+    <tr><td>${fmt(c.z2,2)}</td><td>${fmt(c.p2,4)}</td></tr></tbody></table></div>
+    <div class="formula">(x − ${fmt(c.z1,2)}) / (${fmt(c.z2,2)} − ${fmt(c.z1,2)}) = (${fmt(p,4)} − ${fmt(c.p1,4)}) / (${fmt(c.p2,4)} − ${fmt(c.p1,4)})\n(x − ${fmt(c.z1,2)}) / ${fmt(c.z2-c.z1,2)} = ${fmt(p-c.p1,4)} / ${fmt(c.p2-c.p1,4)}\nx = ${fmt(p-c.p1,4)}/${fmt(c.p2-c.p1,4)} · ${fmt(c.z2-c.z1,2)} + ${fmt(c.z1,2)}\nx = ${fmt(zc,4)}</div>`;
+  }
+  if(tipo==='<')interp+=`<div class="note">Por simetría de la curva, en cola izquierda el valor crítico es −${fmt(zc,3)}.</div>`;
+
+  const decision=tipo==='>'?`Z = ${fmt(Z,3)} ${rechaza?'>':'≤'} ${fmt(zc,3)}`:tipo==='<'?`Z = ${fmt(Z,3)} ${rechaza?'<':'≥'} −${fmt(zc,3)}`:`|Z| = ${fmt(Math.abs(Z),3)} ${rechaza?'>':'≤'} ${fmt(zc,3)}`;
+  const regionTxt=rechaza?'cae en la región de rechazo (R.R.)':'cae en la región de aceptación (R.A.)';
+  const concl=rechaza
+   ?`Rechazamos H₀ porque ${decision}.<br>Con α = ${fmt(alfa,4)} hay evidencia suficiente para afirmar que μ ${sym} ${fmt(mu,4)}.`
+   :`No rechazamos H₀ porque ${decision}.<br>Con α = ${fmt(alfa,4)} no hay evidencia suficiente para afirmar que μ ${sym} ${fmt(mu,4)}.`;
+
+  out.innerHTML=`
+  <div class="step"><h3>Datos</h3><div class="formula">α = ${fmt(alfa,4)} (${fmt(alfa*100,3)}%)\nn = ${fmt(n,0)}\nx̄ = ${fmt(xb)}\ns² = ${fmt(vr)}   →   s = √${fmt(vr)} = ${fmt(s)}</div>
+  ${n<30?'<div class="note">⚠ Con n &lt; 30 y σ desconocida normalmente se usa la distribución t de Student; aquí se aplica Z como en el procedimiento de clase.</div>':''}</div>
+
+  <div class="step"><h3>① Hipótesis</h3><div class="formula">H₀: μ = ${fmt(mu)}\nH₁: μ ${sym} ${fmt(mu)}</div></div>
+
+  <div class="step"><h3>② Nivel de significancia</h3><div class="formula">α = ${fmt(alfa,4)}\n1 − α = ${fmt(1-alfa,4)}</div></div>
+
+  <div class="step"><h3>③ Prueba estadística</h3><div class="formula">Z = (x̄ − μ₀) / (s / √n)\nZ = (${fmt(xb)} − ${fmt(mu)}) / (${fmt(s)} / √${fmt(n,0)})\nZ = ${fmt(xb-mu)} / ${fmt(ee)}\nZ = <b>${fmt(Z,4)}</b></div></div>
+
+  <div class="step"><h3>④ Criterio de decisión (interpolación)</h3>
+  <div class="formula">${areaTxt}</div>${interp}
+  <div class="formula"><b>${critTxt}</b></div>
+  ${grafica(tipo,zc,Z,rechaza)}
+  <div class="note">Z calculado = ${fmt(Z,3)} ${regionTxt}. Valor p ≈ ${fmt(pval,4)}.</div></div>
+
+  <div class="step"><h3>⑥ Conclusión</h3><div class="concl ${rechaza?'rej':'acc'}">${concl}</div></div>`;
+}
+
+$('calcular').onclick=resolver;
+$('nombre').oninput=()=>{$('autorTxt').textContent=$('nombre').value.trim()||'—'};
+$('ejemplo').onclick=()=>{$('alfa').value='0.05';$('n').value='36';$('xbar').value='1510';$('mu').value='1500';$('stype').value='var';$('sval').value='900';$('h1').value='>';resolver()};
+$('limpiar').onclick=()=>{['alfa','n','xbar','mu','sval'].forEach(i=>$(i).value='');$('res').innerHTML='<div class="empty">Ingresa los datos y pulsa <b>Resolver</b>.</div>'};
 </script>
-</div></body></html>
+</body>
+</html>
